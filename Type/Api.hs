@@ -7,7 +7,7 @@ module Type.Api
   )where
 
 import Control.Applicative (Applicative)
-import Control.Monad.Reader as E (MonadReader, ReaderT (..), asks)
+import Control.Monad.Reader as E (MonadReader, ReaderT (..), asks, ask)
 import Control.Monad.Trans (MonadIO)
 import Control.Monad.Trans.Resource (MonadResource (..), runResourceT)
 import Database.Persist.Sql (ConnectionPool, SqlPersistM, runSqlPool)

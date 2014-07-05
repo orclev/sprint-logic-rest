@@ -32,6 +32,7 @@ Sprint
     plannedPoints Int
     deliveredPoints Int Maybe
     UniqueSprintIdent ident
+    UniqueSprintNumber team number
     deriving Show Eq Generic Typeable
 |]
 
