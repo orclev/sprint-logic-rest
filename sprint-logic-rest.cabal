@@ -31,6 +31,8 @@ executable sprint-logic-rest
                        , MultiParamTypeClasses
   build-depends:       base >=4.7 && <4.8
                      , wai
+                     , wai-cors
+                     , http-types
                      , warp >= 3.0.0.3
                      , transformers >= 0.3.0.0
                      , transformers-base
