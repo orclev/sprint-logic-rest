@@ -1,10 +1,11 @@
 module Type.CreateSprint 
-  ( CreateSprint (..) 
+  ( CreateSprint (..)
   ) where
 
 import Type.Core
 import Control.Monad.Reader (MonadReader, ask)
 import qualified Type.Sprint as S (Sprint (..), SprintGeneric (..))
+import Database.Persist.TH (derivePersistField)
 
 data CreateSprint = CreateSprint 
   { sprintNumber :: Int

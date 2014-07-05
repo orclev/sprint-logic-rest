@@ -2,11 +2,12 @@ module Type.Sprint
   ( Sprint (..)
   , SprintGeneric (..)
   , SprintError (..)
+  , EntityField (..)
   , Unique (..)
   ) where
 
 import Type.Core
-import Type.Generated (Sprint (..), SprintGeneric (..), Unique (..))
+import Type.Generated (Sprint (..), SprintGeneric (..), Unique (..), EntityField (..))
 
 data SprintError = InvalidName | SprintExists | UnknownError
   deriving (Eq, Generic, Ord, Show, Typeable)

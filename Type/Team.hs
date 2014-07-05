@@ -2,11 +2,12 @@ module Type.Team
   ( Team (..)
   , TeamGeneric (..)
   , TeamError (..)
+  , EntityField (..)
   , Unique (..)
   ) where
 
 import Type.Core
-import Type.Generated (Team (..), TeamGeneric (..), Unique (..))
+import Type.Generated (Team (..), TeamGeneric (..), Unique (..), EntityField (..))
 
 data TeamError = InvalidName | TeamExists | UnknownError
   deriving (Eq, Generic, Ord, Show, Typeable)

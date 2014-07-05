@@ -4,6 +4,7 @@ module Type.Generated
   , Unique (..)
   , Sprint (..)
   , SprintGeneric (..)
+  , EntityField (..)
   , migrateAll
   ) where
 
