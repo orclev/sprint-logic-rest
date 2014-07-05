@@ -68,9 +68,9 @@ insertSprint :: C.CreateSprint -> ErrorT (Reason SprintError) WithTeam Sprint
 insertSprint newSprint = do
   ns <- createFrom newSprint
   mVal <- (lift . lift) $ runDB $ do
-    key <- DB.insert ns
-    DB.get key
-  maybe (throwError $ domainReason (const 400) UnknownError) return mVal
+    key <- DB.insertUnique ns
+    maybe (return Nothing) DB.get key
+  maybe (throwError $ domainReason (const 409) SprintExists) return mVal
 
 updateS :: Handler WithSprint
 updateS = mkIdHandler (jsonI . someI . jsonE . someE . jsonO . someO) updateSprint
@@ -81,8 +81,7 @@ updateSprint ns rid = do
   sel <- lift . lift $ getUniqueSelector rid
   mVal <- (lift . lift . lift) $ runDB $ do
     S.update $ \s -> do
-      set s [ SprintNumber =. val (C.sprintNumber ns)
-            , SprintPeople =. val (C.sprintPeople ns)
+      set s [ SprintPeople =. val (C.sprintPeople ns)
             , SprintWorkDays =. val (C.sprintWorkDays ns)
             , SprintVacationDays =. val (C.sprintVacationDays ns)
             , SprintInterruptHours =. val (C.sprintInterruptHours ns)
