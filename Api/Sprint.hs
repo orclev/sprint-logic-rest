@@ -30,6 +30,7 @@ resource = mkResourceReader
   , R.get = Just get
   , R.create = Just create
   , R.update = Just updateS
+  , R.remove = Just remove
   , R.list = const list
   }
 
@@ -71,6 +72,16 @@ insertSprint newSprint = do
     key <- DB.insertUnique ns
     maybe (return Nothing) DB.get key
   maybe (throwError $ domainReason (const 409) SprintExists) return mVal
+
+remove :: Handler WithSprint
+remove = mkIdHandler id deleteSprint
+
+deleteSprint :: () -> SprintId -> ErrorT (Reason ()) WithSprint ()
+deleteSprint _ sprintId = do
+  teamId <- lift . lift $ ask
+  sel <- lift . lift $ getUniqueSelector sprintId
+  lift . lift . lift $ runDB $ do
+    DB.deleteBy sel
 
 updateS :: Handler WithSprint
 updateS = mkIdHandler (jsonI . someI . jsonE . someE . jsonO . someO) updateSprint
