@@ -12,6 +12,8 @@ import Control.Monad.Trans (MonadIO)
 import Control.Monad.Trans.Resource (MonadResource (..), runResourceT)
 import Database.Persist.Sql (ConnectionPool, SqlPersistM, runSqlPool)
 import Control.Monad.IO.Class as E (liftIO)
+import Control.Monad.Trans as E (lift)
+import Control.Monad.Trans.Error as E (ErrorT, throwError)
 import Control.Monad.Logger (runNoLoggingT)
 
 data ServerData = ServerData { dbPool :: ConnectionPool }

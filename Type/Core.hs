@@ -1,7 +1,10 @@
 module Type.Core 
   ( ResourceKind (..)
   , ResourceIdent (..)
+  , CreateAble (createFrom)
   , randomRid
+  , MonadIO
+  , liftIO
   , module E
   ) where
 
@@ -11,20 +14,27 @@ import Data.UUID (UUID (..), toWords)
 import Data.UUID.V4 (nextRandom)
 import Data.List (genericIndex)
 import Data.Bits (shiftL)
+import Rest.Info (Info (describe))
+import Rest.Types.ShowUrl (ShowUrl (showUrl))
+import Control.Monad.Trans (MonadIO)
+import Control.Monad.IO.Class (liftIO)
 import Data.Typeable as E (Typeable)
 import GHC.Generics as E (Generic)
 import Data.Aeson as E
 import Data.JSON.Schema as E (JSONSchema (schema), gSchema)
 
-data ResourceKind = TeamR | PostR deriving (Eq, Typeable, Generic)
+class MonadIO m => CreateAble m a b where
+  createFrom :: a -> m b
+
+data ResourceKind = TeamR | SprintR deriving (Eq, Typeable, Generic)
 
 instance Show ResourceKind where
   show TeamR = "team"
-  show PostR = "post"
+  show SprintR = "sprint"
 
 instance Read ResourceKind where
   readsPrec _ "team" = [(TeamR, "")]
-  readsPrec _ "post" = [(PostR, "")]
+  readsPrec _ "sprint" = [(SprintR, "")]
 
 derivePersistField "ResourceKind"
 
@@ -46,6 +56,12 @@ instance ToJSON ResourceIdent where
   toJSON = toJSON . show
 instance FromJSON ResourceIdent where
   parseJSON (String val) = return . read $ unpack val
+
+instance Info ResourceIdent where
+  describe _ = "identifier"
+
+instance ShowUrl ResourceIdent where
+  showUrl = show
 
 randomRid :: ResourceKind -> IO ResourceIdent
 randomRid tag = nextRandom >>= return . encode

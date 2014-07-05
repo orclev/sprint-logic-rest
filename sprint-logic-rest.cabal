@@ -28,6 +28,7 @@ executable sprint-logic-rest
                        , EmptyDataDecls, GeneralizedNewtypeDeriving
                        , DeriveDataTypeable, TypeSynonymInstances
                        , FlexibleInstances, DeriveGeneric
+                       , MultiParamTypeClasses
   build-depends:       base >=4.7 && <4.8
                      , wai
                      , warp >= 3.0.0.3

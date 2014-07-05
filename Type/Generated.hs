@@ -2,6 +2,8 @@ module Type.Generated
   ( Team (..)
   , TeamGeneric (..)
   , Unique (..)
+  , Sprint (..)
+  , SprintGeneric (..)
   , migrateAll
   ) where
 
@@ -15,10 +17,27 @@ Team
     ident ResourceIdent
     name Text
     UniqueName name
-    UniqueIdent ident
+    UniqueTeamIdent ident
+    deriving Show Eq Generic Typeable
+
+Sprint
+    team ResourceIdent
+    ident ResourceIdent
+    number Int
+    people Int
+    workDays Int
+    vacationDays Int
+    interruptHours Int Maybe
+    plannedPoints Int
+    deliveredPoints Int Maybe
+    UniqueSprintIdent ident
     deriving Show Eq Generic Typeable
 |]
 
 instance JSONSchema Team where schema = gSchema
 instance ToJSON Team
 instance FromJSON Team
+
+instance JSONSchema Sprint where schema = gSchema
+instance ToJSON Sprint
+instance FromJSON Sprint
