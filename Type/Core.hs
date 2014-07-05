@@ -1,15 +1,20 @@
-module Model.Core where
+module Type.Core 
+  ( ResourceKind (..)
+  , ResourceIdent (..)
+  , randomRid
+  , module E
+  ) where
 
-import Database.Persist.TH
-import Data.Text (Text, pack, unpack, append)
-import Data.UUID
-import Data.UUID.V4
+import Database.Persist.TH (derivePersistField)
+import Data.Text as E (Text, pack, unpack, append)
+import Data.UUID (UUID (..), toWords)
+import Data.UUID.V4 (nextRandom)
 import Data.List (genericIndex)
 import Data.Bits (shiftL)
-import Data.Typeable
-import GHC.Generics
-import qualified Data.Aeson as A
-import Data.JSON.Schema
+import Data.Typeable as E (Typeable)
+import GHC.Generics as E (Generic)
+import Data.Aeson as E
+import Data.JSON.Schema as E (JSONSchema (schema), gSchema)
 
 data ResourceKind = TeamR | PostR deriving (Eq, Typeable, Generic)
 
@@ -24,8 +29,8 @@ instance Read ResourceKind where
 derivePersistField "ResourceKind"
 
 instance JSONSchema ResourceKind where schema = gSchema
-instance A.ToJSON ResourceKind
-instance A.FromJSON ResourceKind
+instance ToJSON ResourceKind
+instance FromJSON ResourceKind
 
 data ResourceIdent = RID ResourceKind Text deriving (Eq, Typeable, Generic)
 derivePersistField "ResourceIdent"
@@ -37,10 +42,10 @@ instance Read ResourceIdent where
   readsPrec _ mrid = let (tag, val) = break (=='_') mrid in [(RID (read tag) (pack . drop 1 . fst $ break (==' ') val), snd $ break (==' ') val)]
 
 instance JSONSchema ResourceIdent where schema = gSchema
-instance A.ToJSON ResourceIdent where
-  toJSON = A.toJSON . show
-instance A.FromJSON ResourceIdent where
-  parseJSON (A.String val) = return . read $ unpack val
+instance ToJSON ResourceIdent where
+  toJSON = toJSON . show
+instance FromJSON ResourceIdent where
+  parseJSON (String val) = return . read $ unpack val
 
 randomRid :: ResourceKind -> IO ResourceIdent
 randomRid tag = nextRandom >>= return . encode

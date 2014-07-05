@@ -17,7 +17,12 @@ cabal-version:       >=1.10
 
 executable sprint-logic-rest
   main-is:             Main.hs
-  other-modules:       Model,Types,Model.Core,Api.Team
+  other-modules:       Type.Api
+                     , Type.Core
+                     , Type.Generated
+                     , Type.Team
+                     , Type.CreateTeam
+                     , Api.Team
   default-extensions:    OverloadedStrings, QuasiQuotes, TemplateHaskell
                        , TypeFamilies, GADTs, FlexibleContexts
                        , EmptyDataDecls, GeneralizedNewtypeDeriving

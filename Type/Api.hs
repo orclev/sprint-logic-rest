@@ -1,16 +1,18 @@
-module Types where
+module Type.Api 
+  ( ServerData (..)
+  , SiteApi (..)
+  , module E
+  , runSiteApi
+  , runDB
+  )where
 
 import Control.Applicative (Applicative)
-import Control.Monad.Reader (MonadReader, ReaderT (..))
+import Control.Monad.Reader as E (MonadReader, ReaderT (..), asks)
 import Control.Monad.Trans (MonadIO)
 import Control.Monad.Trans.Resource (MonadResource (..), runResourceT)
-import Database.Persist.Sqlite
-import Database.Persist.Sql
-import Rest
-import Rest.Info
-import Control.Monad.Reader (ReaderT (..), asks)
-import Control.Monad.IO.Class  (liftIO)
-import Control.Monad.Logger
+import Database.Persist.Sql (ConnectionPool, SqlPersistM, runSqlPool)
+import Control.Monad.IO.Class as E (liftIO)
+import Control.Monad.Logger (runNoLoggingT)
 
 data ServerData = ServerData { dbPool :: ConnectionPool }
 

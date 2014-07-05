@@ -1,21 +1,22 @@
 module Api.Team where
 
-import Model
-import Model.Core
-import Types
+import Type.Core
+import Type.Team
+import Type.Api
+import Type.CreateTeam
 import Control.Monad.Reader (ReaderT (..), asks)
-import Rest
-import Rest.Info
-import Rest.Types.ShowUrl
+import Rest (jsonO,someO,jsonI,someI,jsonE,someE,Resource,Void,mkResourceReader
+            ,withListing,unnamedSingleRead,Handler,mkIdHandler,Reason (..),mkListing
+            ,mkInputHandler,ListHandler,domainReason)
+import Rest.Info (Info (describe))
+import Rest.Types.ShowUrl (ShowUrl (showUrl))
 import qualified Rest.Resource as R
 import Control.Monad.IO.Class  (liftIO)
 import Control.Monad.Trans (lift)
-import Control.Monad.Trans.Error
+import Control.Monad.Trans.Error (ErrorT, throwError)
 import Control.Applicative ((<$>),(<*>))
 import qualified Database.Persist as DB
 import qualified Database.Persist.Sql as DB
-import Control.Monad.Trans.Resource
-import Control.Monad.Logger
 
 type WithTeam = ReaderT ResourceIdent SiteApi
 

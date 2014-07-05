@@ -2,15 +2,14 @@ module Main where
 
 import qualified Network.Wai as W
 import Network.Wai.Handler.Warp (run)
-import Rest.Driver.Wai
-import Control.Monad.IO.Class
-import Rest.Api
-import Database.Persist.Sqlite
+import Rest.Driver.Wai (apiToApplication)
+import Rest.Api (Router, root, route, Api, mkVersion, Some1 (Some1), (-/))
+import Database.Persist.Sqlite (createSqlitePool, runSqlPool, runMigration)
 import Control.Monad.Trans.Resource (runResourceT)
 import Control.Monad.Logger (runStderrLoggingT)
-import Model
 import qualified Api.Team as Team
-import Types
+import Type.Api (ServerData (..), SiteApi, runSiteApi)
+import Type.Generated (migrateAll)
 
 site :: Router SiteApi SiteApi
 site = root -/ team
