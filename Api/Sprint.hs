@@ -1,23 +1,22 @@
 module Api.Sprint 
   ( resource
   , WithSprint
+  , SprintIdent
   ) where
 
 import Type.Core
 import Type.Sprint
 import qualified Type.CreateSprint as C
 import Type.Api
-import Api.Team (WithTeam)
-import Rest (jsonO,someO,jsonI,someI,jsonE,someE,Resource,Void,mkResourceReader
-            ,withListing,named,singleRead,Handler,mkIdHandler,Reason (..),mkListing
-            ,mkInputHandler,ListHandler,domainReason)
+import Api.Team (WithTeam, TeamIdent)
+import Rest
 import qualified Rest.Resource as R
 import Control.Applicative ((<$>),(<*>))
 import qualified Database.Persist as DB
 import qualified Database.Persist.Sql as DB
 import Database.Esqueleto as S hiding (get)
 
-data SprintId = ById ResourceIdent | ByNumber Int
+data SprintId = ById SprintIdent | ByNumber Int | Latest
 
 type WithSprint = ReaderT SprintId WithTeam
 
@@ -26,6 +25,7 @@ resource = mkResourceReader
   { R.name = "sprint"
   , R.schema = withListing () $ named [("id", singleRead ById)
                                       ,("number", singleRead ByNumber)
+                                      ,("latest", single Latest)
                                       ]
   , R.get = Just get
   , R.create = Just create
@@ -45,9 +45,17 @@ get = mkIdHandler (jsonE . someE . jsonO . someO) findSprint
 
 getUniqueSelector :: SprintId -> WithTeam (Unique (SprintGeneric SqlBackend))
 getUniqueSelector (ById rid) = return $ UniqueSprintIdent rid
+getUniqueSelector Latest = do
+  teamId <- ask
+  return $ UniqueSprintLatest teamId Active
 getUniqueSelector (ByNumber n) = do
   teamId <- ask
   return $ UniqueSprintNumber teamId n
+
+getLatest :: TeamIdent -> SqlPersistM (Maybe Sprint)
+getLatest teamId = do
+  mSprint <- DB.getBy $ UniqueSprintLatest teamId Active
+  return $ DB.entityVal <$> mSprint
 
 getSprint :: Unique (SprintGeneric SqlBackend) -> SiteApi (Maybe Sprint)
 getSprint rid = do
@@ -67,11 +75,20 @@ create = mkInputHandler (jsonI . someI . jsonE . someE . jsonO . someO) insertSp
 
 insertSprint :: C.CreateSprint -> ErrorT (Reason SprintError) WithTeam Sprint
 insertSprint newSprint = do
-  ns <- createFrom newSprint
+  ns <- lift $ makeSprint newSprint
+  teamId <- lift ask
   mVal <- (lift . lift) $ runDB $ do
-    key <- DB.insertUnique ns
+    mLatest <- getLatest teamId
+    let n = maybe 1 ((+1) . sprintNumber) mLatest
+    S.update $ \s -> do
+      set s [ SprintLatest =. val Inactive ]
+      where_ (s ^. SprintLatest ==. val Active &&. s ^. SprintTeam ==. val teamId)
+    key <- DB.insertUnique $ ns { sprintNumber = n, sprintLatest = Active }
     maybe (return Nothing) DB.get key
   maybe (throwError $ domainReason (const 409) SprintExists) return mVal
+
+makeSprint :: C.CreateSprint -> WithTeam (SprintGeneric SqlBackend)
+makeSprint = createFrom
 
 remove :: Handler WithSprint
 remove = mkIdHandler id deleteSprint
@@ -105,3 +122,4 @@ updateSprint ns rid = do
   where
     getWhereClause s (ById sprintId) _ = where_ (s ^. SprintIdent ==. val sprintId)
     getWhereClause s (ByNumber n) teamId = where_ (s ^. SprintNumber ==. val n &&. s ^. SprintTeam ==. val teamId)
+    getWhereClause s Latest teamId = where_ (s ^. SprintLatest ==. val Active &&. s ^. SprintTeam ==. val teamId)

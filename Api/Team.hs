@@ -1,6 +1,7 @@
 module Api.Team 
   ( resource
   , WithTeam
+  , TeamIdent
   ) where
 
 import Type.Core
@@ -15,9 +16,9 @@ import Control.Applicative ((<$>),(<*>))
 import qualified Database.Persist as DB
 import qualified Database.Persist.Sql as DB
 
-type WithTeam = ReaderT ResourceIdent SiteApi
+type WithTeam = ReaderT TeamIdent SiteApi
 
-resource :: Resource SiteApi WithTeam ResourceIdent () Void
+resource :: Resource SiteApi WithTeam TeamIdent () Void
 resource = mkResourceReader
   { R.name = "team"
   , R.schema = withListing () $ unnamedSingleRead id
@@ -29,12 +30,12 @@ resource = mkResourceReader
 get :: Handler WithTeam
 get = mkIdHandler (jsonE . someE . jsonO . someO) findTeam
   where
-    findTeam :: () -> ResourceIdent -> ErrorT (Reason TeamError) WithTeam Team
+    findTeam :: () -> TeamIdent -> ErrorT (Reason TeamError) WithTeam Team
     findTeam _ rid = do
       mTeam <- (lift . lift) (getTeam rid)
       maybe (throwError NotFound) (return) mTeam
 
-getTeam :: ResourceIdent -> SiteApi (Maybe Team)
+getTeam :: TeamIdent -> SiteApi (Maybe Team)
 getTeam rid = do
   mEntity <- runDB $ (DB.getBy $ UniqueTeamIdent rid)
   return $ DB.entityVal <$> mEntity
