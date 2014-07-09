@@ -63,11 +63,16 @@ getSprint rid = do
   return $ DB.entityVal <$> mEntity
     
 list :: ListHandler WithTeam
-list = mkListing (jsonO . someO) $ \r -> (lift . lift) . runDB $ sprintList
+list = mkListing (jsonO . someO) getSprintList
 
-sprintList :: DB.SqlPersistM [Sprint]
-sprintList = do
-  sprints <- DB.selectList [] []
+getSprintList :: Range -> ErrorT (Reason ()) WithTeam [Sprint]
+getSprintList _ = do
+  teamId <- lift ask
+  (lift . lift) . runDB $ sprintList teamId
+
+sprintList :: TeamIdent -> DB.SqlPersistM [Sprint]
+sprintList teamId = do
+  sprints <- DB.selectList [SprintTeam DB.==. teamId] []
   return $ map DB.entityVal sprints
 
 create :: Handler WithTeam
