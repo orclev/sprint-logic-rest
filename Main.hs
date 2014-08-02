@@ -13,12 +13,15 @@ import Type.Api (ServerData (..), SiteApi, runSiteApi)
 import Type.Generated (migrateAll)
 import qualified Api.Team as Team
 import qualified Api.Sprint as Sprint
+import qualified Api.Version as Version
 
 site :: Router SiteApi SiteApi
 site = root -/ team --/ sprint
+            -/ version
   where
     team = route Team.resource
     sprint = route Sprint.resource
+    version = route Version.resource
 
 api :: Api SiteApi
 api = [(mkVersion 1 0 0, Some1 site)]

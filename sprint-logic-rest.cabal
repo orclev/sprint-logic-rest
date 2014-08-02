@@ -22,7 +22,10 @@ executable sprint-logic-rest
                      , Type.Generated
                      , Type.Team
                      , Type.CreateTeam
+                     , Type.Version
                      , Api.Team
+                     , Api.Sprint
+                     , Api.Version
   default-extensions:    OverloadedStrings, QuasiQuotes, TemplateHaskell
                        , TypeFamilies, GADTs, FlexibleContexts
                        , EmptyDataDecls, GeneralizedNewtypeDeriving
@@ -45,6 +48,8 @@ executable sprint-logic-rest
                      , persistent-template
                      , resourcet
                      , monad-logger
+                     , template-haskell
+                     , Cabal
                      , text
                      , uuid
                      , mtl
